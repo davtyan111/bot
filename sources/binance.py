@@ -36,7 +36,9 @@ def get_usdt_price_Binance():
         return f"1 USDT ≈ {price} AMD"
 
     except Exception as e:
+        print(f"❌ Binance USDT error: {e}")
         return f"Error: {e}"
+
     finally:
         driver.quit()
 
@@ -49,17 +51,28 @@ def get_btc_price_Binance():
 
     service = Service(ChromeDriverManager().install())
     driver = webdriver.Chrome(service=service, options=options)
-    driver.get(SOURCE_BINANCE_BTC_USDT)  # ✅ Use the variable for consistency
+    driver.get(SOURCE_BINANCE_BTC_USDT)
 
     try:
         price_element = WebDriverWait(driver, 20).until(
-            EC.presence_of_element_located(
-                (By.CSS_SELECTOR, "div.lock-ltr.text-subtitle1.font-medium")
-            )
+            EC.presence_of_element_located((By.CSS_SELECTOR, "div.lock-ltr.text-subtitle1.font-medium"))
         )
         price = price_element.text.strip()
+
+        if not price:
+            print("BTC: Price element is empty, refreshing...")
+            driver.refresh()
+            price_element = WebDriverWait(driver, 20).until(
+                EC.presence_of_element_located((By.CSS_SELECTOR, "div.lock-ltr.text-subtitle1.font-medium"))
+            )
+            price = price_element.text.strip()
+            print("BTC: Price element found after refresh.")
+
         return f"1 BTC ≈ {price} USDT"
+
     except Exception as e:
+        print(f"❌ Binance BTC error: {e}")
         return f"Error: {e}"
+
     finally:
         driver.quit()
