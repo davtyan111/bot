@@ -4,6 +4,7 @@ from sources.fastex import fetch_fastex_price_usdt, fetch_fastex_price_BTC
 from sources.binance import get_usdt_price_Binance, get_btc_price_Binance
 from sources.okx import fetch_okx_price
 from sources.all_stock import all_prices_command
+from webdriver_manager.chrome import ChromeDriverManager 
 
 # Telegram /start command
 async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -24,6 +25,7 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # Handles USDT or BTC selection
 async def handle_coin_choice(update: Update, context: ContextTypes.DEFAULT_TYPE):
     coin = update.message.text.strip().lower()
+
     if "usdt" in coin:
         context.user_data["coin"] = "usdt"
         keyboard = [["fastex", "binance", "okx"]]
