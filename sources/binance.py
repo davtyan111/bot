@@ -23,19 +23,18 @@ def get_usdt_price_Binance():
             EC.presence_of_element_located((By.CSS_SELECTOR, "input[data-cy='input-fiat-amount']"))
         )
         price = price_element.get_attribute("value")
-        
-        if not price_text:
-            print("BTC: Price element is empty, refreshing...")
+
+        if not price:
+            print("USDT: Price element is empty, refreshing...")
             driver.refresh()
             price_element = WebDriverWait(driver, 15).until(
-                EC.presence_of_element_located(
-                    (By.XPATH, "//p[starts-with(@class, 'lock-ltr text-subtitle1 font-medium')]")
-                )
+                EC.presence_of_element_located((By.CSS_SELECTOR, "input[data-cy='input-fiat-amount']"))
             )
-            price_text = price_element.text.strip()
+            price = price_element.get_attribute("value")
             print("USDT: Price element found after refresh.")
 
         return f"1 USDT ≈ {price} AMD"
+
     except Exception as e:
         return f"Error: {e}"
     finally:
