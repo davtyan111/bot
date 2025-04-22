@@ -1,18 +1,20 @@
 from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-import os
-from bot.config import CHROMEDRIVER_PATH, SOURCE_USDT_FASTEX_USDT , SOURCE_FASTEX_BTC_USDT
+from selenium.webdriver.chrome.service import Service
+from webdriver_manager.chrome import ChromeDriverManager
+
+from bot.config import SOURCE_USDT_FASTEX_USDT, SOURCE_FASTEX_BTC_USDT
+
 
 def fetch_fastex_price_usdt():
     options = webdriver.ChromeOptions()
     options.add_argument('--headless')
     options.add_argument('--no-sandbox')
     options.add_argument('--disable-dev-shm-usage')
-    service = Service(CHROMEDRIVER_PATH)
 
+    service = Service(ChromeDriverManager().install())
     driver = webdriver.Chrome(service=service, options=options)
     driver.get(SOURCE_USDT_FASTEX_USDT)
 
@@ -22,30 +24,34 @@ def fetch_fastex_price_usdt():
                 (By.XPATH, "//p[starts-with(@class, 'MarketPrice_wrapper__price')]")
             )
         )
-        price = f"1 USDT ≈ {price_element.text} AMD"
-        if price_element.text == "":
-             print ("Price element is empty, retrying...")
-             driver.refresh()
-             price_element = WebDriverWait(driver, 15).until(
+        price_text = price_element.text.strip()
+
+        if not price_text:
+            print("USDT: Price element is empty, refreshing...")
+            driver.refresh()
+            price_element = WebDriverWait(driver, 15).until(
                 EC.presence_of_element_located(
                     (By.XPATH, "//p[starts-with(@class, 'MarketPrice_wrapper__price')]")
                 )
-        )
-             print ("Price element found after refresh")
+            )
+            price_text = price_element.text.strip()
+            print("USDT: Price element found after refresh.")
 
-        price = f"1 USDT ≈ {price_element.text} AMD"
+        return f"1 USDT ≈ {price_text} AMD"
+
     except Exception as e:
-        price = f"Error: {e}"
-    driver.quit()
-    return price
+        return f"Error: {e}"
+    finally:
+        driver.quit()
+
 
 def fetch_fastex_price_BTC():
     options = webdriver.ChromeOptions()
     options.add_argument('--headless')
     options.add_argument('--no-sandbox')
     options.add_argument('--disable-dev-shm-usage')
-    service = Service(CHROMEDRIVER_PATH)
 
+    service = Service(ChromeDriverManager().install())
     driver = webdriver.Chrome(service=service, options=options)
     driver.get(SOURCE_FASTEX_BTC_USDT)
 
@@ -55,18 +61,22 @@ def fetch_fastex_price_BTC():
                 (By.XPATH, "//p[starts-with(@class, 'MarketPrice_wrapper__price')]")
             )
         )
-        if price_element.text == "":
-            print("Price element is empty, retrying...")
+        price_text = price_element.text.strip()
+
+        if not price_text:
+            print("BTC: Price element is empty, refreshing...")
             driver.refresh()
             price_element = WebDriverWait(driver, 15).until(
                 EC.presence_of_element_located(
                     (By.XPATH, "//p[starts-with(@class, 'MarketPrice_wrapper__price')]")
                 )
             )
-            print("Price element found after refresh")
+            price_text = price_element.text.strip()
+            print("BTC: Price element found after refresh.")
 
-        price = f"{price_element.text} USDT"
+        return f"1 BTC ≈ {price_text} USDT"
+
     except Exception as e:
-        price = f"Error: {e}"
-    driver.quit()
-    return price
+        return f"Error: {e}"
+    finally:
+        driver.quit()
